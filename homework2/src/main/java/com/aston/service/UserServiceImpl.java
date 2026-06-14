@@ -1,0 +1,50 @@
+package com.aston.service;
+
+import com.aston.dao.UserDao;
+import com.aston.dao.UserDaoImpl;
+import com.aston.entity.User;
+
+import java.util.List;
+
+public class UserServiceImpl implements UserService {
+
+        private final UserDao userDao = new UserDaoImpl();
+
+    @Override
+    public void create(User user) {
+
+        if (user.getAge() < 0) {
+            throw new IllegalArgumentException(
+                    "Возраст не может быть отрицательным");
+        }
+
+        User existing = userDao.findByEmail(user.getEmail());
+
+        if (existing != null) {
+            throw new IllegalArgumentException(
+                    "Пользователь с такой почтой уже существует");
+        }
+
+        userDao.save(user);
+    }
+
+    @Override
+    public User getById(Long id) {
+        return userDao.findById(id);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userDao.findAll();
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
+    @Override
+    public void delete(Long id) {
+        userDao.delete(id);
+    }
+}
