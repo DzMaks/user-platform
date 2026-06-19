@@ -1,14 +1,17 @@
 package com.aston.service;
 
 import com.aston.dao.UserDao;
-import com.aston.dao.UserDaoImpl;
 import com.aston.entity.User;
 
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
-        private final UserDao userDao = new UserDaoImpl();
+    private final UserDao userDao;
+
+    public UserServiceImpl(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     @Override
     public void create(User user) {

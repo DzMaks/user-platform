@@ -1,5 +1,6 @@
 package com.aston.controller;
 
+import com.aston.dao.UserDaoImpl;
 import com.aston.entity.User;
 import com.aston.service.UserService;
 import com.aston.service.UserServiceImpl;
@@ -8,7 +9,7 @@ import java.util.Scanner;
 
 public class UserController {
 
-    private final UserService service = new UserServiceImpl();
+    private final UserService service = new UserServiceImpl(new UserDaoImpl());
     private final Scanner scanner = new Scanner(System.in);
 
     public void start() {

@@ -1,8 +1,11 @@
 package hashmap;
 
+import java.util.Objects;
+
 public class MyHashMap<K, V> {
 
     private static final int DEFAULT_CAPACITY = 16;
+    private static final float LOAD_FACTOR = 0.75f;
     private int size;
     private Node<K, V>[] buckets;
 
@@ -24,12 +27,16 @@ public class MyHashMap<K, V> {
 
     private int getIndex(K key) {
         if (key == null) {
-            throw new IllegalArgumentException("Ключ не может быть нулем");
+           return 0;
         }
         return Math.abs(key.hashCode()) % buckets.length;
     }
 
     public V put(K key, V value) {
+
+        if ((float) size / buckets.length >= LOAD_FACTOR) {
+            rehash();
+        }
 
         int index = getIndex(key);
 
@@ -41,7 +48,7 @@ public class MyHashMap<K, V> {
             return null;
         }
         while (true) {
-            if (current.key.equals(key)) {
+            if (Objects.equals(current.key, key)) {
                 V oldValue = current.value;
                 current.value = value;
                 return oldValue;
@@ -65,7 +72,7 @@ public class MyHashMap<K, V> {
         Node<K, V> current = buckets[index];
 
         while (current != null) {
-            if (current.key.equals(key)) {
+            if (Objects.equals(current.key, key)) {
                 return current.value;
             }
             current = current.next;
@@ -76,25 +83,39 @@ public class MyHashMap<K, V> {
     public V remove(K key) {
 
         int index = getIndex(key);
-
         Node<K, V> current = buckets[index];
         Node<K, V> previous = null;
 
         while (current != null) {
-            if (current.key.equals(key)) {
-                if (previous == null) {
-                    buckets[index] = current.next;
+            if (Objects.equals(current.key, key)) {
+                if (previous == null) {buckets[index] = current.next;
                 } else {
                     previous.next = current.next;
                 }
-                V oldValue = current.value;
                 size--;
-                return oldValue;
+                return current.value;
             }
             previous = current;
             current = current.next;
         }
         return null;
+
+    }
+
+    private void rehash() {
+        Node<K, V>[] oldBuckets = buckets;
+        buckets = new Node[oldBuckets.length * 2];
+        int oldSize = size;
+        size = 0;
+
+        for (Node<K, V> bucket : oldBuckets) {
+            Node<K, V> current = bucket;
+            while (current != null) {
+                put(current.key, current.value);
+                current = current.next;
+            }
+        }
+        size = oldSize;
     }
 
     public int size() {
