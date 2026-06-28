@@ -1,17 +1,18 @@
 package com.aston.service;
 
-import com.aston.entity.User;
+import com.aston.dto.UserRequest;
+import com.aston.dto.UserResponse;
 import java.util.List;
 
 public interface UserService {
 
-    void create(User user);
+    UserResponse create(UserRequest request);
 
-    User getById(Long id);
+    UserResponse getById(Long id);
 
-    List<User> getAll();
+    List<UserResponse> getAll();
 
-    void update(User user);
+    UserResponse update(Long id, UserRequest request);
 
     void delete(Long id);
 }

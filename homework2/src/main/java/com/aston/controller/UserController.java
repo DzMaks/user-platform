@@ -1,159 +1,52 @@
 package com.aston.controller;
 
-import com.aston.dao.UserDaoImpl;
-import com.aston.entity.User;
+import com.aston.dto.UserRequest;
+import com.aston.dto.UserResponse;
 import com.aston.service.UserService;
-import com.aston.service.UserServiceImpl;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Scanner;
+import java.util.List;
 
+@RestController
+@RequestMapping("/users")
 public class UserController {
 
-    private final UserService service = new UserServiceImpl(new UserDaoImpl());
-    private final Scanner scanner = new Scanner(System.in);
+    private final UserService service;
 
-    public void start() {
-
-        while (true) {
-            System.out.println("""
-                === Меню ===
-                1. Создать пользователя
-                2. Найти всех пользователей
-                3. Найти через id
-                4. Обновить данные пользователя
-                5. Удалить пользователя
-                0. Выход
-                """);
-
-            System.out.print("Выберите пункт: ");
-
-            if (!scanner.hasNextInt()) {
-                System.out.println("Введите число!");
-                scanner.nextLine();
-                continue;
-            }
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (choice) {
-                case 1 -> create();
-                case 2 -> service.getAll().forEach(System.out::println);
-                case 3 -> findById();
-                case 4 -> update();
-                case 5 -> delete();
-                case 0 -> {
-                    System.out.println("Пока!");
-                    return;
-                }
-                default -> System.out.println("Неверный пункт меню");
-            }
-        }
+    public UserController(UserService service) {
+        this.service = service;
     }
 
-    private void create() {
-        System.out.print("Имя: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Почта: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Возраст: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Возраст должен быть числом");
-            scanner.nextLine();
-            return;
-        }
-
-        int age = scanner.nextInt();
-        scanner.nextLine();
-
-        User user = new User(name, email, age);
-
-        try {
-            service.create(user);
-            System.out.println("Пользователь создан");
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+    @GetMapping
+    public List<UserResponse> getAll() {
+        return service.getAll();
     }
 
-    private void findById() {
-        System.out.print("ID: ");
-
-        if (!scanner.hasNextLong()) {
-            System.out.println("ID должен быть числом");
-            scanner.nextLine();
-            return;
-        }
-
-        Long id = scanner.nextLong();
-        scanner.nextLine();
-
-        User user = service.getById(id);
-
-        if (user != null) {
-            System.out.println(user);
-        } else {
-            System.out.println("Пользователь не найден");
-        }
+    @GetMapping("/{id}")
+    public UserResponse getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
-    private void update() {
-        System.out.print("ID: ");
-
-        if (!scanner.hasNextLong()) {
-            System.out.println("ID должен быть числом");
-            scanner.nextLine();
-            return;
-        }
-
-        Long id = scanner.nextLong();
-        scanner.nextLine();
-
-        System.out.print("Новое имя: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Новая почта: ");
-        String email = scanner.nextLine();
-
-        System.out.print("Новый возраст: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Возраст должен быть числом");
-            scanner.nextLine();
-            return;
-        }
-
-        int age = scanner.nextInt();
-        scanner.nextLine();
-
-        User user = service.getById(id);
-
-        if (user != null) {
-            user.setName(name);
-            user.setEmail(email);
-            user.setAge(age);
-
-            service.update(user);
-        } else {
-            System.out.println("Пользователь не найден");
-        }
+    @PostMapping
+    public UserResponse create(@RequestBody UserRequest request) {
+        return service.create(request);
     }
 
-    private void delete() {
-        System.out.print("ID: ");
+    @PutMapping("/{id}")
+    public UserResponse update(@PathVariable Long id, @RequestBody UserRequest request) {
+        return service.update(id, request);
+    }
 
-        if (!scanner.hasNextLong()) {
-            System.out.println("ID должен быть числом");
-            scanner.nextLine();
-            return;
-        }
-
-        Long id = scanner.nextLong();
-        scanner.nextLine();
-
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
 }
